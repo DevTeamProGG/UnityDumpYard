@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -14,17 +15,29 @@ public class SpriteAtlasController
 	{
 		mEditor = editor;
 
-		mAtlases = new List<SpriteAtlas>();
 		loadAtlases();
 	}
 
 	private void loadAtlases()
 	{
+		mAtlases = new List<SpriteAtlas>();
+
+		var sa = Directory.GetDirectories(Application.dataPath + "/Resources/Sprites/Tiles");
+
+		foreach(var s in sa)
+		{
+			String[] splits = s.Split('\\');
+			String load = splits[splits.Length - 1];
+			Debug.Log("Loading with string " + load);
+			mAtlases.Add(new SpriteAtlas(load));
+		}
+
 		//TODO: Remove the hard coded string
-		mAtlases.Add(new SpriteAtlas("grass"));
+		// mAtlases.Add(new SpriteAtlas("grass"));
+		// mAtlases.Add(new SpriteAtlas("empty"));
 	}
 
-	public Sprite getIndexedSprite(String name, int index)
+	public jSprite getIndexedSprite(String name, int index)
 	{
 		SpriteAtlas sa = mAtlases.Find(temp => temp.Name == name);
 		if(sa == null)
@@ -35,7 +48,7 @@ public class SpriteAtlasController
 		return sa.getIndexedSprite(index);
 	}
 
-	public Sprite getRandomizedSprite(String name)
+	public jSprite getRandomizedSprite(String name)
 	{
 		SpriteAtlas sa = mAtlases.Find(temp => temp.Name == name);
 		if(sa == null)
@@ -44,6 +57,13 @@ public class SpriteAtlasController
 			return null;
 		}
 		return sa.getRandomSprite();
+	}
+
+	public bool spriteBelongsToAtlas(Sprite sprite, String name)
+	{
+		SpriteAtlas sa = mAtlases.Find(temp => temp.Name == name);
+		if(sa == null) return false;
+		return sa.spriteBelongsToAtlas(sprite);
 	}
 
 	public SpriteAtlas getSpriteAtlas(String name)

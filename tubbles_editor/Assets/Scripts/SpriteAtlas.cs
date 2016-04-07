@@ -7,7 +7,7 @@ using UnityEngine;
 public class SpriteAtlas
 {
 
-	private List<Sprite> mSprites;
+	private List<jSprite> mSprites;
 	private String name;
 
 	public String Name {
@@ -18,10 +18,10 @@ public class SpriteAtlas
 
 	public SpriteAtlas (String _name) 
 	{
-		this.name = _name;
-		mSprites = new List<Sprite>();
+		name = _name;
+		mSprites = new List<jSprite>();
 
-		Sprite[] sprites = Resources.LoadAll<Sprite>("Sprites/" + name);
+		Sprite[] sprites = Resources.LoadAll<Sprite>("Sprites/Tiles/" + name);
 
 		if(sprites.Length == 0)
 		{
@@ -30,11 +30,11 @@ public class SpriteAtlas
 
 		foreach(Sprite s in sprites)
 		{
-			mSprites.Add(s);
+			mSprites.Add(new jSprite(s, name));
 		}
 	}
 
-	public Sprite getRandomSprite()
+	public jSprite getRandomSprite()
 	{
 		if(mSprites == null || mSprites.Count == 0)
 		{
@@ -46,7 +46,7 @@ public class SpriteAtlas
 		return mSprites[(int)UnityEngine.Random.Range(0,mSprites.Count)];
 	}
 
-	public Sprite getIndexedSprite(int index)
+	public jSprite getIndexedSprite(int index)
 	{
 		if(mSprites == null || mSprites.Count <= index)
 		{
@@ -60,9 +60,18 @@ public class SpriteAtlas
 
 	public bool spriteBelongsToAtlas(Sprite sprite)
 	{
-		foreach(Sprite s in mSprites)
+		foreach(jSprite js in mSprites)
 		{
-			if(s == sprite) return true;
+			if(js.sprite == sprite) return true;
+		}
+		return false;
+	}
+
+	public bool spriteBelongsToAtlas(String name)
+	{
+		foreach(jSprite js in mSprites)
+		{
+			if(js.name == name) return true;
 		}
 		return false;
 	}

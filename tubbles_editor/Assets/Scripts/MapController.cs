@@ -12,40 +12,59 @@ public class MapController
 
 	private IntVector2 mMapSize;
 
-	public MapController(EditorController editor, IntVector2 mapSize)
+	public MapController(EditorController editor)
 	{
 		mEditor = editor;
 
 		this.sac = mEditor.spriteAtlasController;
-		mMapSize = mapSize;
 
 		mParent = mEditor.gameObject;
 
-		initializeCells(mMapSize.x, mMapSize.y);
+		loadDefaultMap();
 	}
 
-	public void initializeCells(int x, int y)
+	public void loadDefaultMap()
 	{
-		map = new GameObject[x*y];
-		for(int i = 0; i < x; ++i)
-		{
-			for(int j = 0; j < y; ++j)
-			{
-				map[i*x+j] = new GameObject();
-				map[i*x+j].transform.parent = mParent.transform;
-				map[i*x+j].transform.position = new Vector3(i, j, 0);
-				map[i*x+j].transform.name = "cell_" + i + "_" + j;
+		mMapSize = new IntVector2(100, 100);
 
-				Cell c = map[i*x+j].gameObject.AddComponent<Cell>();
-				c.setSpriteRenderer(map[i*x+j].gameObject.AddComponent<SpriteRenderer>());
+		map = new GameObject[mMapSize.x*mMapSize.y];
+		for(int i = 0; i < mMapSize.x; ++i)
+		{
+			for(int j = 0; j < mMapSize.y; ++j)
+			{
+				map[i*mMapSize.x+j] = new GameObject();
+				map[i*mMapSize.x+j].transform.parent = mParent.transform;
+				map[i*mMapSize.x+j].transform.position = new Vector3(i, j, 0);
+				map[i*mMapSize.x+j].transform.name = "cell_" + i + "_" + j;
+
+				Cell c = map[i*mMapSize.x+j].gameObject.AddComponent<Cell>();
+				c.setSpriteRenderer(map[i*mMapSize.x+j].gameObject.AddComponent<SpriteRenderer>());
 				//TODO: Remove the hard coded string
-				c.setSprite(sac.getRandomizedSprite("grass"));
+				c.setSprite(sac.getRandomizedSprite("empty"));
 			}
 		}
 	}
 
 	public Cell getCellAtWorldCoord(Vector2 Position)
 	{
-		return map[((int)Mathf.Round(Position.x))*mMapSize.x + ((int)Mathf.Round(Position.y))].transform.GetComponents<Cell>()[0];
+		return getCellAtWorldCoord(Position.x, Position.y);
+	}
+
+	public Cell getCellAtWorldCoord(float X, float Y)
+	{
+		int x = (int)Mathf.Round(X);
+		int y = (int)Mathf.Round(Y);
+
+		if(x < 0 || y < 0 || x > mMapSize.x-1 || y > mMapSize.y-1)
+		{
+			Debug.Log("Tried to access cell outside the map boundaries: (" + x + ", " + y + ")");
+			return null;
+		}
+		return map[x*mMapSize.x + y].transform.GetComponents<Cell>()[0];
+	}
+
+	public IntVector2 getCurrentMapSize()
+	{
+		return mMapSize;
 	}
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 
 using UnityEngine;
 
@@ -6,10 +7,18 @@ public class Cell : MonoBehaviour
 {
 	private SpriteRenderer mSpriteRenderer;
 
-	public void setSprite(Sprite s)
+	private String mName;
+
+	public String SpriteName {
+		get {
+			return mName;
+		}
+	}
+
+	public void setSprite(jSprite s)
 	{
-		if(s == mSpriteRenderer.sprite) return;
-		mSpriteRenderer.sprite = s;
+		mName = s.name;
+		mSpriteRenderer.sprite = s.sprite;
 	}
 
 	public Sprite getSprite()
@@ -26,5 +35,10 @@ public class Cell : MonoBehaviour
 	public void setVisible(bool visible)
 	{
 		if(mSpriteRenderer.enabled != visible) mSpriteRenderer.enabled = visible;
+	}
+
+	public bool getVisible()
+	{
+		return mSpriteRenderer.enabled;
 	}
 }

@@ -9,16 +9,13 @@ public class EditorController : MonoBehaviour
 	public InputController inputController;
 	public MapController mapController;
 
-	private IntVector2 mMapSize;
-
 	void Start() 
 	{
 		//  OK start of the editor!! =)
-		mMapSize = new IntVector2(10, 10);
-
 		spriteAtlasController = new SpriteAtlasController(this);
-		inputController = new InputController(this, Camera.main, mMapSize);
-		mapController = new MapController(this, mMapSize);
+		mapController = new MapController(this);
+		inputController = new InputController(this, Camera.main);
+
 	}
 
 	void Update() 
