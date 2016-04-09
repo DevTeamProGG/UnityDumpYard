@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 using System.Collections;
 
-public class Ball : MonoBehaviour {
+public class ballController : MonoBehaviour {
 
     public GameObject restartButton;
     public Text jumpCounterText, MiddleText;
@@ -44,6 +44,11 @@ public class Ball : MonoBehaviour {
             restartButton.SetActive(true);
 
         }
+        else if (coll.CompareTag("Trigger"))
+        {
+            Debug.Log("Hitted Trigger");
+            coll.GetComponent<Trigger>().toggleTrigger();
+        }
 
         Debug.Log(coll.gameObject.tag.ToString());
     }
@@ -59,7 +64,7 @@ public class Ball : MonoBehaviour {
         rb.GetComponent<Rigidbody2D>();
         escaping = false;
         stuck = false;
-        jumpCounter = 10;
+        jumpCounter = 20;
         jumpCounterText.text = "" + jumpCounter;
         restartButton.SetActive(false);
 

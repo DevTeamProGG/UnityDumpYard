@@ -1,23 +1,29 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Gravity_script : MonoBehaviour {
+public class planetGravity : MonoBehaviour {
 
-    public GameObject entity;
+    private GameObject entity;
     public float StrengthOfAttraction;
+
+    private bool ballInReach;
 
     void OnTriggerEnter2D(Collider2D coll)
     {
+        ballInReach = true;
         coll.gameObject.GetComponent<Rigidbody2D>().gravityScale = 0;
+
     }
 
     void OnTriggerExit2D(Collider2D coll)
     {
+        ballInReach = false;
         coll.gameObject.GetComponent<Rigidbody2D>().gravityScale = 1;
     }
 
     // Use this for initialization
     void Start () {
+        ballInReach = false;
         entity = null;
         entity = GameObject.FindGameObjectWithTag("Ball");
         if (entity != null)
@@ -30,7 +36,7 @@ public class Gravity_script : MonoBehaviour {
         entity = null;
         entity = GameObject.FindGameObjectWithTag("Ball");
 
-        if (entity != null)
+        if (entity != null && ballInReach)
         {
             //magsqr will be the offset squared between the object and the planet
             float magsqr;
