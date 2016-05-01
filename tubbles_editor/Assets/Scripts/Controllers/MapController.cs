@@ -9,7 +9,7 @@ public class MapController
 	private EditorController mEditor;
 
 	private GameObject[] mMap;
-	private String mMapName;
+	private String mMapName = "";
 	private GameObject mParent;
 
 	private IntVector2 mMapSize;
@@ -19,11 +19,17 @@ public class MapController
 		mEditor = editor;
 		mParent = mEditor.gameObject;
 
-		loadDefaultMap();
+		generateDefaultMap();
 	}
 
 	public void saveMap()
 	{
+		if(mMapName == "")
+		{
+			Debug.Log("Cannot save a map without a name. Define a name first.");
+			return;
+		}
+
 		var bw = new BinaryWriter(File.Open(Application.dataPath + "/Maps/" + mMapName + ".map", FileMode.Create));
 
 		bw.Write(mMapSize.x);
@@ -48,6 +54,15 @@ public class MapController
 	{
 		mMapName = s;
 		saveMap();
+	}
+
+	public void dialog_loadMap()
+	{
+	}
+
+	public void dialog_loadMapcb(string file)
+	{
+		// GC.Collect();
 	}
 
 	public void loadMap(String s)
@@ -79,10 +94,19 @@ public class MapController
 		Debug.Log("Map loaded sucessfully: " + mMapName + ".map");
 	}
 
-	public void loadDefaultMap()
+	public void generateDefaultMap()
 	{
 		mMapSize = new IntVector2(100, 100);
+		clearMap();
+	}
 
+	public void clearMap()
+	{
+		clearMap("empty");
+	}
+
+	public void clearMap(string clearSprite)
+	{
 		mMap = new GameObject[mMapSize.x*mMapSize.y];
 		for(int i = 0; i < mMapSize.x; ++i)
 		{
@@ -95,7 +119,7 @@ public class MapController
 
 				Cell c = mMap[i*mMapSize.x+j].gameObject.AddComponent<Cell>();
 				c.setSpriteRenderer(mMap[i*mMapSize.x+j].gameObject.AddComponent<SpriteRenderer>());
-				c.setSprite(mEditor.spriteAtlasController.getRandomizedSprite("empty"));
+				c.setSprite(mEditor.spriteAtlasController.getRandomizedSprite(clearSprite));
 			}
 		}
 	}

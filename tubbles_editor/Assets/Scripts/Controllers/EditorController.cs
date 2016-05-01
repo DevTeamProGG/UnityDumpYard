@@ -8,6 +8,10 @@ public class EditorController : MonoBehaviour
 	public SpriteAtlasController spriteAtlasController;
 	public InputController inputController;
 	public MapController mapController;
+	public UIController mUIController;
+
+	[HideInInspector]
+	public bool dialogIsActive = false;
 
 	void Start() 
 	{
@@ -15,7 +19,8 @@ public class EditorController : MonoBehaviour
 		spriteAtlasController = new SpriteAtlasController(this);
 		mapController = new MapController(this);
 		inputController = new InputController(this, Camera.main);
-
+		mUIController = (UIController)gameObject.AddComponent<UIController>();
+		mUIController.setEditorController(this);
 	}
 
 	void Update() 
