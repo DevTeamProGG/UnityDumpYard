@@ -7,14 +7,10 @@ using UnityEngine;
 
 public class SpriteAtlasController
 {
-	private EditorController mEditor;
-
 	private List<SpriteAtlas> mAtlases;
 
-	public SpriteAtlasController(EditorController editor) 
+	public SpriteAtlasController() 
 	{
-		mEditor = editor;
-
 		loadAtlases();
 	}
 

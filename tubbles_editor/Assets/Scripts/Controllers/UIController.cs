@@ -7,33 +7,41 @@ public class UIController : MonoBehaviour
 {
 	private EditorController mEditor;
 
-	private GameObject mPanel;
-
-	public void setEditorController(EditorController controller)
-	{
-		mEditor = controller;
-	}
+	private GameObject mCanvas;
+	private GameObject mFullscreenPanel;
 
 	void Start()
 	{
-		mPanel = GameObject.FindGameObjectWithTag("MainPanel");
-		toggleUI();
-		JUI.addNewButton(mPanel, "TestButton", "Button");
+		mEditor = EditorController.Instance;
+
+		mCanvas = GameObject.FindGameObjectWithTag("MainCanvas");
+
+		mFullscreenPanel = new GameObject();
+		JUI.setupFullscreenPanel(mFullscreenPanel, mCanvas, "Fullscreen Panel");
+		mFullscreenPanel.SetActive(false);
 	}
 
-	public void toggleUI()
+	private void toggleUI(GameObject panel)
 	{
-		mPanel.SetActive(!mPanel.activeSelf);
+		panel.SetActive(!panel.activeSelf);
 	}
 
-	public void hideUI()
+	public void hideUI(GameObject panel)
 	{
-		mPanel.SetActive(false);
+		panel.SetActive(false);
 	}
 
-	public void showUI()
+	public void showUI(GameObject panel)
 	{
-		mPanel.SetActive(true);
+		panel.SetActive(true);
+	}
+
+	public void newOpenFileDialog(Action<OpenFileDialog.Result> Callback)
+	{
+		var go = Instantiate(mEditor.mPrefabSelector.OpenFileDialog);
+		var ofd = go.GetComponent<OpenFileDialog>();
+		ofd.Initialize(mFullscreenPanel, Callback);
+		mFullscreenPanel.SetActive(true);
 	}
 }
 

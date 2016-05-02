@@ -15,16 +15,16 @@ public class InputController
 	private SpriteRenderer mMouseCursor;
 	private Sprite mMouseEditingCursorSprite;
 
-	public InputController(EditorController editor, Camera mainCamera)
+	public InputController(Camera mainCamera)
 	{
-		mEditor = editor;
+		mEditor = EditorController.Instance;
 
 		mMainCam = mainCamera;
 
 		mCursor = new GameObject();
 		mCursor.name = "Mouse Cursor";
 		mMouseCursor = mCursor.AddComponent<SpriteRenderer>();
-		mMouseEditingCursorSprite = Resources.Load<Sprite>("Sprites/cursor");
+		mMouseEditingCursorSprite = Resources.Load<Sprite>("Sprites/UI/cursor");
 		mMouseCursor.sprite = mMouseEditingCursorSprite;
 
 		resetCamera();
@@ -61,13 +61,16 @@ public class InputController
 			if(Input.GetKeyDown(KeyCode.S)) mEditor.mapController.saveMapAs("test");
 
 			// MAKE THE USER ABLE TO LOAD THE MAP WITH L-BUTTON
-			if(Input.GetKeyDown(KeyCode.L)) mEditor.mapController.loadMap("test");
+			if(Input.GetKeyDown(KeyCode.L)) mEditor.mUIController.newOpenFileDialog(mEditor.mapController.loadMap);
 
 			// MAKE THE USER ABLE TO CLEAR THE MAP WITH C-BUTTON
 			if(Input.GetKeyDown(KeyCode.C)) mEditor.mapController.clearMap();
 
 			// MAKE THE USER ABLE TO FILL THE MAP WITH F-BUTTON
 			if(Input.GetKeyDown(KeyCode.F)) mEditor.mapController.clearMap("grass");
+
+			// TEST THE NEW FILE PICKER DIALOG
+			if(Input.GetKeyDown(KeyCode.T)) {}
 
 			// MAKE THE USER ABLE TO LEFT-CLICK TO TOGGLE SPRITES
 			if(Input.GetMouseButton(0))
@@ -89,9 +92,6 @@ public class InputController
 
 		// MAKE THE USER ABLE TO EXIT THE GAME WITH ESC-BUTTON
 		if(Input.GetKeyDown(KeyCode.Escape)) mEditor.quitGame();
-
-		// TEST THE NEW FILE PICKER DIALOG
-		if(Input.GetKeyDown(KeyCode.T)) mEditor.mUIController.toggleUI();
 
 		// EXITING ROUTINE FOR CAMERA
 		Vector3 clampedCamPos = new Vector3(

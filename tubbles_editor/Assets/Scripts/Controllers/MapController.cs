@@ -14,9 +14,9 @@ public class MapController
 
 	private IntVector2 mMapSize;
 
-	public MapController(EditorController editor)
+	public MapController()
 	{
-		mEditor = editor;
+		mEditor = EditorController.Instance;
 		mParent = mEditor.gameObject;
 
 		generateDefaultMap();
@@ -65,12 +65,34 @@ public class MapController
 		// GC.Collect();
 	}
 
+	public void loadMap(OpenFileDialog.Result Result)
+	{
+		if(Result.result == OpenFileDialog.Result.Enum.Open)
+		{
+			string[] temparr = Result.file.Split('\\');
+			mMapName = temparr[temparr.Length - 1];
+
+			var br = new BinaryReader(File.Open(Result.file, FileMode.Open));
+			loadMap(br);
+			Debug.Log("Map loaded sucessfully: " + mMapName + ".map");
+		}
+		else
+		{
+			Debug.Log("No map to open!");
+		}
+	}
+
 	public void loadMap(String s)
 	{
 		mMapName = s;
 
 		var br = new BinaryReader(File.Open(Application.dataPath + "/Maps/" + mMapName + ".map", FileMode.Open));
+		loadMap(br);
+		Debug.Log("Map loaded sucessfully: " + mMapName + ".map");
+	}
 
+	private void loadMap(BinaryReader br)
+	{
 		mMapSize = new IntVector2(br.ReadInt32(), br.ReadInt32());
 
 		mMap = new GameObject[mMapSize.x*mMapSize.y];
@@ -90,8 +112,6 @@ public class MapController
 		}
 
 		br.Close();
-
-		Debug.Log("Map loaded sucessfully: " + mMapName + ".map");
 	}
 
 	public void generateDefaultMap()
