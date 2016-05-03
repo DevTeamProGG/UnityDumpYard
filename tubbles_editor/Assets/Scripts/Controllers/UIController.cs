@@ -8,17 +8,12 @@ public class UIController : MonoBehaviour
 	private EditorController mEditor;
 
 	private GameObject mCanvas;
-	private GameObject mFullscreenPanel;
 
 	void Start()
 	{
 		mEditor = EditorController.Instance;
 
 		mCanvas = GameObject.FindGameObjectWithTag("MainCanvas");
-
-		mFullscreenPanel = new GameObject();
-		JUI.setupFullscreenPanel(mFullscreenPanel, mCanvas, "Fullscreen Panel");
-		mFullscreenPanel.SetActive(false);
 	}
 
 	private void toggleUI(GameObject panel)
@@ -36,12 +31,38 @@ public class UIController : MonoBehaviour
 		panel.SetActive(true);
 	}
 
-	public void newOpenFileDialog(Action<OpenFileDialog.Result> Callback)
+	public void newSelectFileDialog(Action<SelectFileDialog.Result> Callback, string Title)
 	{
-		var go = Instantiate(mEditor.mPrefabSelector.OpenFileDialog);
-		var ofd = go.GetComponent<OpenFileDialog>();
-		ofd.Initialize(mFullscreenPanel, Callback);
-		mFullscreenPanel.SetActive(true);
+		var go = Instantiate(mEditor.mPrefabSelector.SelectFileDialog);
+		go.transform.SetParent(mCanvas.transform, false);
+		var ofd = go.GetComponentInChildren<SelectFileDialog>();
+
+		ofd.Initialize(Callback, Title);
+	}
+
+	public void newSelectFileDialog(Action<SelectFileDialog.Result> Callback)
+	{
+		var go = Instantiate(mEditor.mPrefabSelector.SelectFileDialog);
+		go.transform.SetParent(mCanvas.transform, false);
+		var ofd = go.GetComponentInChildren<SelectFileDialog>();
+
+		ofd.Initialize(Callback);
+	}
+
+	public void newOkDialog(Dialog.Type reason, string msg, Action cbWhenOk)
+	{
+		var go = Instantiate(mEditor.mPrefabSelector.Dialog);
+		var d = go.GetComponentInChildren<Dialog>();
+
+		d.InitializeOk(mCanvas, reason, msg, cbWhenOk);
+	}
+
+	public void newYesNoDialog(Dialog.Type reason, string msg, Action cbWhenYes, Action cbWhenNo)
+	{
+		var go = Instantiate(mEditor.mPrefabSelector.Dialog);
+		var d = go.GetComponentInChildren<Dialog>();
+
+		d.InitializeYesNo(mCanvas, reason, msg, cbWhenYes, cbWhenNo);
 	}
 }
 

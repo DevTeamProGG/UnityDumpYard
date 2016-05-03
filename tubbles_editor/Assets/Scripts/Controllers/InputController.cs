@@ -58,10 +58,10 @@ public class InputController
 			mCursor.transform.position = new Vector3(Mathf.Round(currPoint.x), Mathf.Round(currPoint.y), -1);
 
 			// MAKE THE USER ABLE TO SAVE THE MAP WITH S-BUTTON
-			if(Input.GetKeyDown(KeyCode.S)) mEditor.mapController.saveMapAs("test");
+			if(Input.GetKeyDown(KeyCode.S)) mEditor.mUIController.newSelectFileDialog(mEditor.mapController.saveMap, "Select a save location");
 
 			// MAKE THE USER ABLE TO LOAD THE MAP WITH L-BUTTON
-			if(Input.GetKeyDown(KeyCode.L)) mEditor.mUIController.newOpenFileDialog(mEditor.mapController.loadMap);
+			if(Input.GetKeyDown(KeyCode.L)) mEditor.mUIController.newSelectFileDialog(mEditor.mapController.loadMap, "Select a file to load");
 
 			// MAKE THE USER ABLE TO CLEAR THE MAP WITH C-BUTTON
 			if(Input.GetKeyDown(KeyCode.C)) mEditor.mapController.clearMap();

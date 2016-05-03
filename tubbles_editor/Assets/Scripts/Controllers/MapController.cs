@@ -10,9 +10,14 @@ public class MapController
 
 	private GameObject[] mMap;
 	private String mMapName = "";
+	private string mLastSaveName;
 	private GameObject mParent;
 
 	private IntVector2 mMapSize;
+
+	private const byte mHead1 = 0x4D, mHead2 = 0x41, mHead3 = 0x50;
+	private const byte mMapReaderVersion = 0x01; // INCREMENT EACH TIME NON BACKWARDS COMPATIBLE CHANGES TO MAP STRUCTURE ARE MADE
+	private byte[] mMapHeaderv1 = {mHead1, mHead2, mHead3, mMapReaderVersion};
 
 	public MapController()
 	{
@@ -22,7 +27,7 @@ public class MapController
 		generateDefaultMap();
 	}
 
-	public void saveMap()
+	public void saveMap(BinaryWriter bw)
 	{
 		if(mMapName == "")
 		{
@@ -30,7 +35,10 @@ public class MapController
 			return;
 		}
 
-		var bw = new BinaryWriter(File.Open(Application.dataPath + "/Maps/" + mMapName + ".map", FileMode.Create));
+		foreach(var b in mMapHeaderv1)
+		{
+			bw.Write(b);
+		}
 
 		bw.Write(mMapSize.x);
 		bw.Write(mMapSize.y);
@@ -47,7 +55,7 @@ public class MapController
 
 		bw.Close();
 
-		Debug.Log("Map saved sucessfully: " + mMapName + ".map");
+		Debug.Log("Map saved sucessfully: " + mMapName);
 	}
 
 	public void saveMapAs(String s)
@@ -56,43 +64,74 @@ public class MapController
 		saveMap();
 	}
 
-	public void dialog_loadMap()
+	public void saveMap(SelectFileDialog.Result Result)
 	{
-	}
-
-	public void dialog_loadMapcb(string file)
-	{
-		// GC.Collect();
-	}
-
-	public void loadMap(OpenFileDialog.Result Result)
-	{
-		if(Result.result == OpenFileDialog.Result.Enum.Open)
+		if(Result.result == SelectFileDialog.Result.Enum.Select)
 		{
 			string[] temparr = Result.file.Split('\\');
 			mMapName = temparr[temparr.Length - 1];
 
-			var br = new BinaryReader(File.Open(Result.file, FileMode.Open));
-			loadMap(br);
-			Debug.Log("Map loaded sucessfully: " + mMapName + ".map");
+			if(File.Exists(Result.file))
+			{
+				mLastSaveName = Result.file;
+				mEditor.mUIController.newYesNoDialog(Dialog.Type.QOverwriteFile, "Overwrite already existing file:\n" + Result.file + "?", saveMap, null);
+				return;
+			}
+
+			var bw = new BinaryWriter(File.Open(Result.file, FileMode.Create));
+			saveMap(bw);
 		}
 		else
 		{
-			Debug.Log("No map to open!");
+
 		}
 	}
 
-	public void loadMap(String s)
+	public void saveMap()
 	{
-		mMapName = s;
+		var bw = new BinaryWriter(File.Open(mLastSaveName, FileMode.Create));
+		saveMap(bw);
+	}
 
-		var br = new BinaryReader(File.Open(Application.dataPath + "/Maps/" + mMapName + ".map", FileMode.Open));
-		loadMap(br);
-		Debug.Log("Map loaded sucessfully: " + mMapName + ".map");
+	public void loadMap(SelectFileDialog.Result Result)
+	{
+		if(Result.result == SelectFileDialog.Result.Enum.Select)
+		{
+			string[] temparr = Result.file.Split('\\');
+			mMapName = temparr[temparr.Length - 1];
+
+			if(!File.Exists(Result.file))
+			{
+				mEditor.mUIController.newOkDialog(Dialog.Type.EFileDoesNotExist, "Cannot open file: File does not exist.", null);
+				return;
+			}
+
+			var br = new BinaryReader(File.Open(Result.file, FileMode.Open));
+			loadMap(br);
+		}
+		else
+		{
+			
+		}
 	}
 
 	private void loadMap(BinaryReader br)
 	{
+		if(br.PeekChar() == mMapHeaderv1[0])
+		{
+			Debug.Log("Map v1 detected");
+			for(int i = 0; i < mMapHeaderv1.Length; ++i)
+			{
+				byte b = br.ReadByte();
+				if(b != mMapHeaderv1[i])
+				{
+					mEditor.mUIController.newOkDialog(Dialog.Type.EFileIsNotCorrectFormat, "Cannot open file: File is corrupted.", null);
+					Debug.Log("Map corrupted. Exiting.");
+					return;
+				}
+			}
+		}
+
 		mMapSize = new IntVector2(br.ReadInt32(), br.ReadInt32());
 
 		mMap = new GameObject[mMapSize.x*mMapSize.y];
@@ -112,6 +151,7 @@ public class MapController
 		}
 
 		br.Close();
+		Debug.Log("Map loaded sucessfully");
 	}
 
 	public void generateDefaultMap()

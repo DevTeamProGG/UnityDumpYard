@@ -3,7 +3,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class OpenFileDialogItem : MonoBehaviour 
+public class SelectFileDialogItem : MonoBehaviour 
 {
 	public enum ItemType
 	{
@@ -14,11 +14,11 @@ public class OpenFileDialogItem : MonoBehaviour
 	public Text mText;
 	public ItemType mItemType;
 
-	public OpenFileDialog mParentDialog;
+	public SelectFileDialog mParentDialog;
 	public Image mSelectorImage;
 	public Image mImage;
 
-	public void Initialize(OpenFileDialog Parent, ItemType Type)
+	public void Initialize(SelectFileDialog Parent, ItemType Type)
 	{
 		mParentDialog = Parent;
 		mItemType = Type;
