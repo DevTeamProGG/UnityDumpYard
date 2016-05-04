@@ -9,15 +9,14 @@ public class MapController
 	private EditorController mEditor;
 
 	private GameObject[] mMap;
-	private String mMapName = "";
-	private string mLastSaveName;
+	private string mFileLocation = "";
 	private GameObject mParent;
 
 	private IntVector2 mMapSize;
 
-	private const byte mHead1 = 0x4D, mHead2 = 0x41, mHead3 = 0x50;
-	private const byte mMapReaderVersion = 0x01; // INCREMENT EACH TIME NON BACKWARDS COMPATIBLE CHANGES TO MAP STRUCTURE ARE MADE
-	private byte[] mMapHeaderv1 = {mHead1, mHead2, mHead3, mMapReaderVersion};
+	private const byte mMapReaderVersion1 = 0x01; // INCREMENT EACH TIME NON BACKWARDS COMPATIBLE CHANGES TO MAP STRUCTURE ARE MADE
+	private byte[] mMapHeaderv1 = {(byte)'M', (byte)'A', (byte)'P', mMapReaderVersion1};
+	private const int mMapVersionLocationInHeader = 3;
 
 	public MapController()
 	{
@@ -27,13 +26,41 @@ public class MapController
 		generateDefaultMap();
 	}
 
-	public void saveMap(BinaryWriter bw)
+
+	//----------------------------
+	// SAVE MAP ROUTINES
+	//----------------------------
+
+	public void saveMap()
 	{
-		if(mMapName == "")
+		if(mFileLocation == "")
 		{
-			Debug.Log("Cannot save a map without a name. Define a name first.");
+			mEditor.mUIController.newSelectFileDialog(mEditor.mapController.SaveMapAs, "Select a save location", null);
 			return;
 		}
+
+		saveMapWorker();
+	}
+
+	public void SaveMapAs(SelectFileDialog.Result Result)
+	{
+		if(Result.result == SelectFileDialog.Result.Enum.Select)
+		{
+			mFileLocation = Result.file;
+
+			if(File.Exists(mFileLocation))
+			{
+				mEditor.mUIController.newYesNoDialog(Dialog.Type.QOverwriteFile, "Overwrite already existing file:\n" + Result.file + "?", saveMapWorker, SaveMapAsCancel);
+				return;
+			}
+
+			saveMapWorker();
+		}
+	}
+
+	private void saveMapWorker()
+	{
+		var bw = new BinaryWriter(File.Open(mFileLocation, FileMode.Create));
 
 		foreach(var b in mMapHeaderv1)
 		{
@@ -54,107 +81,105 @@ public class MapController
 		}
 
 		bw.Close();
-
-		Debug.Log("Map saved sucessfully: " + mMapName);
+		Debug.Log("Map saved sucessfully: " + Path.GetFileName(mFileLocation));
 	}
 
-	public void saveMapAs(String s)
+	private void SaveMapAsCancel()
 	{
-		mMapName = s;
-		saveMap();
+		mFileLocation = "";
 	}
 
-	public void saveMap(SelectFileDialog.Result Result)
-	{
-		if(Result.result == SelectFileDialog.Result.Enum.Select)
-		{
-			string[] temparr = Result.file.Split('\\');
-			mMapName = temparr[temparr.Length - 1];
 
-			if(File.Exists(Result.file))
-			{
-				mLastSaveName = Result.file;
-				mEditor.mUIController.newYesNoDialog(Dialog.Type.QOverwriteFile, "Overwrite already existing file:\n" + Result.file + "?", saveMap, null);
-				return;
-			}
+	//----------------------------
+	// LOAD MAP ROUTINES
+	//----------------------------
 
-			var bw = new BinaryWriter(File.Open(Result.file, FileMode.Create));
-			saveMap(bw);
-		}
-		else
-		{
-
-		}
-	}
-
-	public void saveMap()
-	{
-		var bw = new BinaryWriter(File.Open(mLastSaveName, FileMode.Create));
-		saveMap(bw);
-	}
-
-	public void loadMap(SelectFileDialog.Result Result)
+	public void loadMapAs(SelectFileDialog.Result Result)
 	{
 		if(Result.result == SelectFileDialog.Result.Enum.Select)
 		{
-			string[] temparr = Result.file.Split('\\');
-			mMapName = temparr[temparr.Length - 1];
-
 			if(!File.Exists(Result.file))
 			{
 				mEditor.mUIController.newOkDialog(Dialog.Type.EFileDoesNotExist, "Cannot open file: File does not exist.", null);
 				return;
 			}
 
-			var br = new BinaryReader(File.Open(Result.file, FileMode.Open));
-			loadMap(br);
-		}
-		else
-		{
-			
+			mFileLocation = Result.file;
+
+			loadMapWorker();
 		}
 	}
 
-	private void loadMap(BinaryReader br)
+	private void loadMapWorker()
 	{
-		if(br.PeekChar() == mMapHeaderv1[0])
+		var br = new BinaryReader(File.Open(mFileLocation, FileMode.Open));
+		byte[] header = br.ReadBytes(mMapHeaderv1.Length);
+
+		if(!checkHeader(header))
 		{
-			Debug.Log("Map v1 detected");
-			for(int i = 0; i < mMapHeaderv1.Length; ++i)
+			Debug.Log("Unsupported map format.");
+			mEditor.mUIController.newOkDialog(Dialog.Type.EFileIsNotCorrectFormat, "Cannot open file: Unsupported map format.", null);
+		}
+		else
+		{
+			switch(header[mMapVersionLocationInHeader])
 			{
-				byte b = br.ReadByte();
-				if(b != mMapHeaderv1[i])
+			case mMapReaderVersion1:
 				{
-					mEditor.mUIController.newOkDialog(Dialog.Type.EFileIsNotCorrectFormat, "Cannot open file: File is corrupted.", null);
-					Debug.Log("Map corrupted. Exiting.");
-					return;
+					mMapSize = new IntVector2(br.ReadInt32(), br.ReadInt32());
+
+					mMap = new GameObject[mMapSize.x*mMapSize.y];
+					for(int i = 0; i < mMapSize.x; ++i)
+					{
+						for(int j = 0; j < mMapSize.y; ++j)
+						{
+							mMap[i*mMapSize.x+j] = new GameObject();
+							mMap[i*mMapSize.x+j].transform.parent = mParent.transform;
+							mMap[i*mMapSize.x+j].transform.position = new Vector3(i, j, 0);
+							mMap[i*mMapSize.x+j].transform.name = "cell_" + i + "_" + j;
+
+							Cell c = mMap[i*mMapSize.x+j].gameObject.AddComponent<Cell>();
+							c.setSpriteRenderer(mMap[i*mMapSize.x+j].gameObject.AddComponent<SpriteRenderer>());
+							c.setSprite(mEditor.spriteAtlasController.getIndexedSprite(br.ReadString(), br.ReadInt32()));
+						}
+					}
+					break;
+				}
+			default:
+				{
+					mEditor.mUIController.newOkDialog(Dialog.Type.EFileIsNotCorrectFormat, "Cannot open file: Unsupported map version.", null);
+					break;
 				}
 			}
 		}
 
-		mMapSize = new IntVector2(br.ReadInt32(), br.ReadInt32());
+		br.Close();
+	}
 
-		mMap = new GameObject[mMapSize.x*mMapSize.y];
-		for(int i = 0; i < mMapSize.x; ++i)
+	private bool checkHeader(byte[] bytes)
+	{
+		if(bytes.Length != mMapHeaderv1.Length)
 		{
-			for(int j = 0; j < mMapSize.y; ++j)
-			{
-				mMap[i*mMapSize.x+j] = new GameObject();
-				mMap[i*mMapSize.x+j].transform.parent = mParent.transform;
-				mMap[i*mMapSize.x+j].transform.position = new Vector3(i, j, 0);
-				mMap[i*mMapSize.x+j].transform.name = "cell_" + i + "_" + j;
+			return false;
+		}
 
-				Cell c = mMap[i*mMapSize.x+j].gameObject.AddComponent<Cell>();
-				c.setSpriteRenderer(mMap[i*mMapSize.x+j].gameObject.AddComponent<SpriteRenderer>());
-				c.setSprite(mEditor.spriteAtlasController.getIndexedSprite(br.ReadString(), br.ReadInt32()));
+		for(int i = 0; i < bytes.Length; ++i)
+		{
+			if(bytes[i] != mMapHeaderv1[i])
+			{
+				return false;
 			}
 		}
 
-		br.Close();
-		Debug.Log("Map loaded sucessfully");
+		return true;
 	}
 
-	public void generateDefaultMap()
+
+	//----------------------------
+	// VARIOUS UTILITY ROUTINES
+	//----------------------------
+
+	private void generateDefaultMap()
 	{
 		mMapSize = new IntVector2(100, 100);
 		clearMap();

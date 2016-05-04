@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections;
 
 using UnityEngine;
@@ -22,9 +23,6 @@ public class EditorController : MonoBehaviour
 	[HideInInspector]
 	public PrefabSelector mPrefabSelector;
 
-	[HideInInspector]
-	public bool dialogIsActive = false;
-
 	void Start() 
 	{
 		mEditor = this;
@@ -35,6 +33,8 @@ public class EditorController : MonoBehaviour
 		inputController = new InputController(Camera.main);
 		mUIController = (UIController)gameObject.AddComponent<UIController>();
 		mPrefabSelector = FindObjectOfType<PrefabSelector>();
+
+		Debug.Log("separator char: " + Path.DirectorySeparatorChar);
 	}
 
 	void Update() 

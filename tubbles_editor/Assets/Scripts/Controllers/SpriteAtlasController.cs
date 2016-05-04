@@ -22,7 +22,7 @@ public class SpriteAtlasController
 
 		foreach(var s in sa)
 		{
-			String[] splits = s.Split('\\');
+			String[] splits = s.Split(Path.DirectorySeparatorChar);
 			String load = splits[splits.Length - 1];
 			Debug.Log("Loading with string " + load);
 			mAtlases.Add(new SpriteAtlas(load));

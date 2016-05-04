@@ -31,22 +31,13 @@ public class UIController : MonoBehaviour
 		panel.SetActive(true);
 	}
 
-	public void newSelectFileDialog(Action<SelectFileDialog.Result> Callback, string Title)
+	public void newSelectFileDialog(Action<SelectFileDialog.Result> Callback, string Title, string[] FileExtensions)
 	{
 		var go = Instantiate(mEditor.mPrefabSelector.SelectFileDialog);
 		go.transform.SetParent(mCanvas.transform, false);
 		var ofd = go.GetComponentInChildren<SelectFileDialog>();
 
-		ofd.Initialize(Callback, Title);
-	}
-
-	public void newSelectFileDialog(Action<SelectFileDialog.Result> Callback)
-	{
-		var go = Instantiate(mEditor.mPrefabSelector.SelectFileDialog);
-		go.transform.SetParent(mCanvas.transform, false);
-		var ofd = go.GetComponentInChildren<SelectFileDialog>();
-
-		ofd.Initialize(Callback);
+		ofd.Initialize(Callback, Title, FileExtensions);
 	}
 
 	public void newOkDialog(Dialog.Type reason, string msg, Action cbWhenOk)
