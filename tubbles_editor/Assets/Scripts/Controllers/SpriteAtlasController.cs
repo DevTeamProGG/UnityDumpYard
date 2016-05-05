@@ -9,8 +9,12 @@ public class SpriteAtlasController
 {
 	private List<SpriteAtlas> mAtlases;
 
+	public Sprite TransparentSprite;
+
 	public SpriteAtlasController() 
 	{
+		TransparentSprite = Resources.Load<Sprite>("Sprites/UI/transparent");
+
 		loadAtlases();
 	}
 
@@ -27,6 +31,18 @@ public class SpriteAtlasController
 			Debug.Log("Loading with string " + load);
 			mAtlases.Add(new SpriteAtlas(load));
 		}
+	}
+
+	public List<string> getAllAtlasesNames()
+	{
+		List<string> list = new List<string>();
+
+		foreach(var sa in mAtlases)
+		{
+			list.Add(sa.Name);
+		}
+
+		return list;
 	}
 
 	public jSprite getIndexedSprite(String name, int index)

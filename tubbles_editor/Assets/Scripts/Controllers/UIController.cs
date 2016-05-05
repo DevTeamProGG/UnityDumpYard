@@ -1,34 +1,154 @@
 ﻿using System;
+using System.Collections.Generic;
 
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEditor;
 
 public class UIController : MonoBehaviour
 {
+	public enum OverlayFadeState
+	{
+		Full,
+		Half,
+		Hidden,
+	}
+
+	private OverlayFadeState mOverlayFadeState = OverlayFadeState.Full;
+
 	private EditorController mEditor;
 
 	private GameObject mCanvas;
+	private GameObject mMainInfoPanel;
+	private GameObject mTilePicker;
+	private GameObject mCurrentBrush;
+	private CurrentTile mCurrentTile;
+
+	private List<GameObject> mOverlayPanels;
 
 	void Start()
 	{
 		mEditor = EditorController.Instance;
 
 		mCanvas = GameObject.FindGameObjectWithTag("MainCanvas");
+		mMainInfoPanel = GameObject.FindGameObjectWithTag("MainInfoPanel");
+
+		mOverlayPanels = new List<GameObject>();
+		foreach(var go in GameObject.FindGameObjectsWithTag("UIOverlay"))
+		{
+			mOverlayPanels.Add(go);
+		}
+
+		mCurrentBrush = GameObject.Find("CurrentBrush");
+		mCurrentTile = mCurrentBrush.GetComponentInChildren<CurrentTile>();
+
+		clearCurrentTileBrush();
 	}
 
-	private void toggleUI(GameObject panel)
+	public void LateStart()
 	{
-		panel.SetActive(!panel.activeSelf);
+		mTilePicker = GameObject.Find("TilePicker");
+		// Debug.Log(mTilePicker);
+		mTilePicker.GetComponentInChildren<TilePicker>().addAllTiles();
+		setInfoPanelTextAndActive("", false);
 	}
 
-	public void hideUI(GameObject panel)
+	void Update()
 	{
-		panel.SetActive(false);
+		// 00 sw
+		// 01 se
+		// 10 nw
+		// 11 ne
+
+		Vector2 pos = new Vector2(0.0f, 0.0f);
+
+		// GET MOUSE POSITION QUADRANT ON SCREEN
+
+		// Debug.Log(Input.mousePosition);
+		string[] res = UnityStats.screenRes.Split('x');
+		// Debug.Log(int.Parse(res[0]) + " " + int.Parse(res[1]));
+
+		if(Input.mousePosition.x > int.Parse(res[0]) / 2.0f)
+		{
+			pos.x = 1.0f;
+		}
+
+		if(Input.mousePosition.y > int.Parse(res[1]) / 2.0f)
+		{
+			pos.y = 1.0f;
+		}
+
+		mMainInfoPanel.GetComponent<RectTransform>().pivot = pos;
+
+		mMainInfoPanel.transform.position = Input.mousePosition;
 	}
 
-	public void showUI(GameObject panel)
+	public void setCurrentTileBrush(TilePickerItem copy)
 	{
-		panel.SetActive(true);
+		mCurrentTile.mImage.sprite = copy.mImage.sprite;
+		mCurrentTile.mSpriteName = copy.mSpriteName;
+		mCurrentTile.mText = copy.mText;
+	}
+
+	public string getCurrentTileBrushName()
+	{
+		return mCurrentTile.mSpriteName;
+	}
+
+	public void clearCurrentTileBrush()
+	{
+		mCurrentTile.mImage.sprite = mEditor.spriteAtlasController.TransparentSprite;
+		mCurrentTile.mSpriteName = "";
+		mCurrentTile.mText = "";
+	}
+
+	public void setInfoPanelTextAndActive(string text, bool active)
+	{
+		mMainInfoPanel.GetComponentInChildren<Text>().text = text;
+		mMainInfoPanel.gameObject.SetActive(active);
+	}
+
+	public void cycleOverlayVisibility()
+	{
+		switch(mOverlayFadeState)
+		{
+		case OverlayFadeState.Full:
+			{
+				mOverlayFadeState = OverlayFadeState.Half;
+				foreach(var go in mOverlayPanels)
+				{
+					go.SetActive(true);
+					var im = go.GetComponent<Image>();
+					if(im != null)
+					{
+						im.color = new Color(im.color.r, im.color.g, im.color.b, 0.5f);
+					}
+				}
+				break;
+			}
+		case OverlayFadeState.Half:
+			{
+				mOverlayFadeState = OverlayFadeState.Hidden;
+				foreach(var go in mOverlayPanels)
+				{
+					go.SetActive(false);
+					var im = go.GetComponent<Image>();
+					im.color = new Color(im.color.r, im.color.g, im.color.b, 0.0f);
+				}
+				break;
+			}
+		case OverlayFadeState.Hidden:
+			{
+				mOverlayFadeState = OverlayFadeState.Full;
+				foreach(var go in mOverlayPanels)
+				{
+					go.SetActive(true);
+					var im = go.GetComponent<Image>();
+					im.color = new Color(im.color.r, im.color.g, im.color.b, 1.0f);
+				}
+				break;
+			}
+		}
 	}
 
 	public void newSelectFileDialog(Action<SelectFileDialog.Result> Callback, string Title, string[] FileExtensions)

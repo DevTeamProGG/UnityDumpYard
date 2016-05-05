@@ -23,6 +23,8 @@ public class EditorController : MonoBehaviour
 	[HideInInspector]
 	public PrefabSelector mPrefabSelector;
 
+	private bool doLateStart = true;
+
 	void Start() 
 	{
 		mEditor = this;
@@ -31,14 +33,23 @@ public class EditorController : MonoBehaviour
 		spriteAtlasController = new SpriteAtlasController();
 		mapController = new MapController();
 		inputController = new InputController(Camera.main);
-		mUIController = (UIController)gameObject.AddComponent<UIController>();
+		mUIController = gameObject.AddComponent<UIController>();
 		mPrefabSelector = FindObjectOfType<PrefabSelector>();
+	}
 
-		Debug.Log("separator char: " + Path.DirectorySeparatorChar);
+	void LateStart()
+	{
+		mUIController.LateStart();
 	}
 
 	void Update() 
 	{
+		if(doLateStart)
+		{
+			doLateStart = false;
+			LateStart();
+		}
+
 		inputController.Update();
 	}
 	

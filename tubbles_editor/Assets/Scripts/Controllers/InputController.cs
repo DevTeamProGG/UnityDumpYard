@@ -69,13 +69,10 @@ public class InputController
 			// MAKE THE USER ABLE TO FILL THE MAP WITH F-BUTTON
 			if(Input.GetKeyDown(KeyCode.F)) mEditor.mapController.clearMap("grass");
 
-			// TEST THE NEW FILE PICKER DIALOG
-			if(Input.GetKeyDown(KeyCode.T)) {}
-
 			// MAKE THE USER ABLE TO LEFT-CLICK TO TOGGLE SPRITES
 			if(Input.GetMouseButton(0))
 			{
-				paint(mEditor.mapController.getCellAtWorldCoord(currPoint));
+				mEditor.mapController.paintSpriteAtLocation(mEditor.mUIController.getCurrentTileBrushName(), currPoint);
 			}
 
 			// MAKE THE USER ABLE TO SCROLL-ZOOM
@@ -88,7 +85,10 @@ public class InputController
 				mMainCam.orthographicSize = Mathf.Max(mMainCam.orthographicSize - 1, 2);
 			}
 		}
-		// DO THE REST OF THINGS THINGS
+		// DO THE REST OF THINGS
+
+		// TEST THE FADE OVERLAY OPTION
+		if(Input.GetKeyDown(KeyCode.T)) mEditor.mUIController.cycleOverlayVisibility();
 
 		// MAKE THE USER ABLE TO EXIT THE GAME WITH ESC-BUTTON
 		if(Input.GetKeyDown(KeyCode.Escape)) mEditor.quitGame();
@@ -106,23 +106,6 @@ public class InputController
 	public void resetCamera()
 	{
 		mMainCam.transform.position = new Vector3((mEditor.mapController.getCurrentMapSize().x-1.0f)/2.0f, (mEditor.mapController.getCurrentMapSize().y-1.0f)/2.0f, -10);
-		mMainCam.orthographicSize = 5;
-	}
-
-	private void paint(Cell c)
-	{
-		if(c != null)
-		{
-			if(Input.GetKey(KeyCode.LeftShift))
-			{
-				if(!mEditor.spriteAtlasController.spriteBelongsToAtlas(c.getSprite(), "empty"))
-					c.setSprite(mEditor.spriteAtlasController.getRandomizedSprite("empty"));
-			}
-			else
-			{
-				if(!mEditor.spriteAtlasController.spriteBelongsToAtlas(c.getSprite(), "grass"))
-					c.setSprite(mEditor.spriteAtlasController.getRandomizedSprite("grass"));
-			}
-		}
+		mMainCam.orthographicSize = 15;
 	}
 }

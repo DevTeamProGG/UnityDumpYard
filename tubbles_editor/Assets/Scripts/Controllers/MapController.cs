@@ -231,4 +231,18 @@ public class MapController
 	{
 		return mMapSize;
 	}
+
+	public void paintSpriteAtLocation(string spriteName, Vector3 location)
+	{
+		if(spriteName == null || spriteName == string.Empty)
+		{
+			return;
+		}
+		var c = getCellAtWorldCoord(location);
+		if(c != null)
+		{
+			if(!mEditor.spriteAtlasController.spriteBelongsToAtlas(c.getSprite(), spriteName))
+				c.setSprite(mEditor.spriteAtlasController.getRandomizedSprite(spriteName));
+		}
+	}
 }

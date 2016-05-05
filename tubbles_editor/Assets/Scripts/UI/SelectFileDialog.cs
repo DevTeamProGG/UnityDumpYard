@@ -27,6 +27,7 @@ public class SelectFileDialog : MonoBehaviour
 	public Sprite mDirSprite;
 	public Sprite mTransparentSprite;
 	public Sprite mSelectorSprite;
+	public ScrollRect mScrollRect;
 
 	public void Initialize(Action<SelectFileDialog.Result> Callback, string Title, string[] FileExtensions)
 	{
@@ -74,13 +75,23 @@ public class SelectFileDialog : MonoBehaviour
 
 		mItems = new List<SelectFileDialogItem>();
 
+		if(!ExplorerLocationText.text.EndsWith(Path.DirectorySeparatorChar.ToString()))
+		{
+			ExplorerLocationText.text += Path.DirectorySeparatorChar;
+		}
+
+		if(!Directory.Exists(ExplorerLocationText.text))
+		{
+			Debug.Log("Directory does not exist.");
+			return;
+		}
+
 		string[] dirs = Directory.GetDirectories(ExplorerLocationText.text);
 		string[] files = Directory.GetFiles(ExplorerLocationText.text);
 
 		foreach(var d in dirs)
 		{
 			string[] temp = d.Split(Path.DirectorySeparatorChar);
-			// string[] temp = d.Split('\\');
 			string dirname = temp[temp.Length - 1];
 
 			var inst = Instantiate(Item);
@@ -91,12 +102,13 @@ public class SelectFileDialog : MonoBehaviour
 			sfdi.mSelectorImage.sprite = mTransparentSprite;
 			inst.transform.SetParent(Locator.transform);
 			sfdi.Initialize(this, SelectFileDialogItem.ItemType.Directory);
+
+			inst.GetComponent<PropagateDragging>().mainScrollRect = mScrollRect;
 		}
 
 		foreach(var f in files)
 		{
 			string[] temp = f.Split(Path.DirectorySeparatorChar);
-			// string[] temp = f.Split('\\');
 			string filename = temp[temp.Length - 1];
 			bool extensionFound = false;
 
@@ -126,6 +138,8 @@ public class SelectFileDialog : MonoBehaviour
 				sfdi.mSelectorImage.sprite = mTransparentSprite;
 				inst.transform.SetParent(Locator.transform);
 				sfdi.Initialize(this, SelectFileDialogItem.ItemType.File);
+
+				inst.GetComponent<PropagateDragging>().mainScrollRect = mScrollRect;
 			}
 		}
 
@@ -142,10 +156,10 @@ public class SelectFileDialog : MonoBehaviour
 
 		if(item == mSelectedItem && (delta < mCoolDown))
 		{
+			// THE USER DOUBLE CLICKED
 			if(item.mItemType == SelectFileDialogItem.ItemType.Directory)
 			{
 				ExplorerLocationText.text += mSelectedItem.mText.text + Path.DirectorySeparatorChar;
-				// ExplorerLocationText.text += mSelectedItem.mText.text + "\\";
 				UpdateLocator();
 			}
 			if(item.mItemType == SelectFileDialogItem.ItemType.File)
@@ -165,18 +179,18 @@ public class SelectFileDialog : MonoBehaviour
 		if(item != null)
 		{
 			item.mSelectorImage.sprite = mSelectorSprite;
-		}
 
-		if(item.mItemType == SelectFileDialogItem.ItemType.File)
-		{
-			SelectButton.GetComponent<Button>().interactable = true;
-		}
-		else
-		{
-			SelectButton.GetComponent<Button>().interactable = false;
-		}
+			if(item.mItemType == SelectFileDialogItem.ItemType.File)
+			{
+				SelectButton.GetComponent<Button>().interactable = true;
+			}
+			else
+			{
+				SelectButton.GetComponent<Button>().interactable = true;
+			}
 
-		FileNameText.text = item.mText.text;
+			FileNameText.text = item.mText.text;
+		}
 	}
 
 	public void SelectItemWithoutClick(SelectFileDialogItem item)
@@ -198,7 +212,7 @@ public class SelectFileDialog : MonoBehaviour
 			}
 			else
 			{
-				SelectButton.GetComponent<Button>().interactable = false;
+				SelectButton.GetComponent<Button>().interactable = true;
 			}
 
 			FileNameText.text = item.mText.text;
@@ -216,7 +230,6 @@ public class SelectFileDialog : MonoBehaviour
 		if(mSelectedItem != null && mSelectedItem.mItemType == SelectFileDialogItem.ItemType.Directory)
 		{
 			ExplorerLocationText.text += mSelectedItem.mText.text + Path.DirectorySeparatorChar;
-			// ExplorerLocationText.text += mSelectedItem.mText.text + "\\";
 			UpdateLocator();
 		}
 		else
