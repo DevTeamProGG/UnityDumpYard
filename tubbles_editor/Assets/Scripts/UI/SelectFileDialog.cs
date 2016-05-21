@@ -59,6 +59,14 @@ public class SelectFileDialog : MonoBehaviour
 		UpdateLocator();
 	}
 
+	void Update()
+	{
+		if(Input.GetKeyDown(KeyCode.Escape))
+		{
+			cbCancelButton();
+		}
+	}
+
 	public void Finish()
 	{
 		if(callbackWhenDone != null)

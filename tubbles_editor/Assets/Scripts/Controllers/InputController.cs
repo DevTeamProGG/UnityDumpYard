@@ -39,7 +39,10 @@ public class InputController
 			// DO GUI THINGS
 
 			// HIDE THE EDITING CURSOR
-			if(mMouseCursor.sprite != null) mMouseCursor.sprite = null;
+			if(mMouseCursor.sprite != null)
+			{
+				mMouseCursor.sprite = null;
+			}
 		}
 		else
 		{
@@ -54,20 +57,35 @@ public class InputController
 			}
 
 			// MAKE THE USER ABLE TO SEE THE CURSOR, AND LET IT FOLLOW THE MOUSE
-			if(mMouseCursor.sprite != mMouseEditingCursorSprite) mMouseCursor.sprite = mMouseEditingCursorSprite;
+			if(mMouseCursor.sprite != mMouseEditingCursorSprite)
+			{
+				mMouseCursor.sprite = mMouseEditingCursorSprite;
+			}
 			mCursor.transform.position = new Vector3(Mathf.Round(currPoint.x), Mathf.Round(currPoint.y), -1);
 
 			// MAKE THE USER ABLE TO SAVE THE MAP WITH S-BUTTON
-			if(Input.GetKeyDown(KeyCode.S)) mEditor.mUIController.newSelectFileDialog(mEditor.mapController.SaveMapAs, "Select a save location", null);
+			if(Input.GetKeyDown(KeyCode.S) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
+			{
+				mEditor.mapController.saveMap();
+			}
 
 			// MAKE THE USER ABLE TO LOAD THE MAP WITH L-BUTTON
-			if(Input.GetKeyDown(KeyCode.L)) mEditor.mUIController.newSelectFileDialog(mEditor.mapController.loadMapAs, "Select a file to load", new string[]{".map"});
+			if(Input.GetKeyDown(KeyCode.L) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
+			{
+				mEditor.mUIController.newSelectFileDialog(mEditor.mapController.loadMapAs, "Select a file to load", new string[]{".map"});
+			}
 
 			// MAKE THE USER ABLE TO CLEAR THE MAP WITH C-BUTTON
-			if(Input.GetKeyDown(KeyCode.C)) mEditor.mapController.clearMap();
+			if(Input.GetKeyDown(KeyCode.C)) 
+			{
+				mEditor.mapController.clearMap();
+			}
 
 			// MAKE THE USER ABLE TO FILL THE MAP WITH F-BUTTON
-			if(Input.GetKeyDown(KeyCode.F)) mEditor.mapController.clearMap("grass");
+			if(Input.GetKeyDown(KeyCode.F)) 
+			{
+				mEditor.mapController.clearMapGrass();
+			}
 
 			// MAKE THE USER ABLE TO LEFT-CLICK TO TOGGLE SPRITES
 			if(Input.GetMouseButton(0))
@@ -84,14 +102,20 @@ public class InputController
 			{
 				mMainCam.orthographicSize = Mathf.Max(mMainCam.orthographicSize - 1, 2);
 			}
+
+			// MAKE THE USER ABLE TO EXIT THE GAME WITH ESC-BUTTON
+			if(Input.GetKeyDown(KeyCode.Escape)) 
+			{
+				mEditor.mUIController.showMainMenu();
+			}
 		}
 		// DO THE REST OF THINGS
 
 		// TEST THE FADE OVERLAY OPTION
-		if(Input.GetKeyDown(KeyCode.T)) mEditor.mUIController.cycleOverlayVisibility();
-
-		// MAKE THE USER ABLE TO EXIT THE GAME WITH ESC-BUTTON
-		if(Input.GetKeyDown(KeyCode.Escape)) mEditor.quitGame();
+		if(Input.GetKeyDown(KeyCode.T)) 
+		{
+			mEditor.mUIController.cycleOverlayVisibility();
+		}
 
 		// EXITING ROUTINE FOR CAMERA
 		Vector3 clampedCamPos = new Vector3(

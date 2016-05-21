@@ -48,6 +48,11 @@ public class MapController
 		{
 			mFileLocation = Result.file;
 
+			if(!Path.HasExtension(mFileLocation))
+			{
+				mFileLocation += ".map";
+			}
+
 			if(File.Exists(mFileLocation))
 			{
 				mEditor.mUIController.newYesNoDialog(Dialog.Type.QOverwriteFile, "Overwrite already existing file:\n" + Result.file + "?", saveMapWorker, SaveMapAsCancel);
@@ -188,6 +193,11 @@ public class MapController
 	public void clearMap()
 	{
 		clearMap("empty");
+	}
+
+	public void clearMapGrass()
+	{
+		clearMap("grass");
 	}
 
 	public void clearMap(string clearSprite)

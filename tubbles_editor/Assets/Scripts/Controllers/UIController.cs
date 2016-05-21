@@ -151,6 +151,25 @@ public class UIController : MonoBehaviour
 		}
 	}
 
+	public void showMainMenu()
+	{
+		var go = Instantiate(mEditor.mPrefabSelector.MainMenu);
+		go.transform.SetParent(mCanvas.transform, false);
+
+		var mm = go.GetComponent<MainMenu>();
+		mm.setMode(MainMenu.Mode.MainMenu);
+	}
+
+	public void saveFileDialog()
+	{
+		mEditor.mUIController.newSelectFileDialog(mEditor.mapController.SaveMapAs, "Select a save location", null);
+	}
+
+	public void loadFileDialog()
+	{
+		mEditor.mUIController.newSelectFileDialog(mEditor.mapController.loadMapAs, "Select a file to load", new string[]{".map"});
+	}
+
 	public void newSelectFileDialog(Action<SelectFileDialog.Result> Callback, string Title, string[] FileExtensions)
 	{
 		var go = Instantiate(mEditor.mPrefabSelector.SelectFileDialog);

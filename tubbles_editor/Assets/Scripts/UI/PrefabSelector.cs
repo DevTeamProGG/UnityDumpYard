@@ -4,5 +4,5 @@ using UnityEngine;
 
 public class PrefabSelector : MonoBehaviour
 {
-	public GameObject SelectFileDialog, SelectFileDialogMenuItem, Dialog;
+	public GameObject SelectFileDialog, SelectFileDialogMenuItem, Dialog, MainMenu;
 }
