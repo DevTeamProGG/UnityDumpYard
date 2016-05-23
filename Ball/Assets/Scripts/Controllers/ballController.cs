@@ -86,6 +86,7 @@ public class ballController : MonoBehaviour {
 	void FixedUpdate () {
 	    if(escaping)
         {
+            
             rb.AddRelativeForce(new Vector2(0, fireForce), ForceMode2D.Impulse);
   
         }
