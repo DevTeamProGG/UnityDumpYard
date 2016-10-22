@@ -174,9 +174,9 @@ public class UIController : MonoBehaviour
 	{
 		var go = Instantiate(mEditor.mPrefabSelector.SelectFileDialog);
 		go.transform.SetParent(mCanvas.transform, false);
-		var ofd = go.GetComponentInChildren<SelectFileDialog>();
+		var sfd = go.GetComponentInChildren<SelectFileDialog>();
 
-		ofd.Initialize(Callback, Title, FileExtensions);
+		sfd.Initialize(Callback, Title, FileExtensions);
 	}
 
 	public void newOkDialog(Dialog.Type reason, string msg, Action cbWhenOk)

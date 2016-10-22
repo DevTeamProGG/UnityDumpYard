@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿					using System.Collections;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -27,7 +27,7 @@ public class InputController
 		mMouseEditingCursorSprite = Resources.Load<Sprite>("Sprites/UI/cursor");
 		mMouseCursor.sprite = mMouseEditingCursorSprite;
 
-		resetCamera();
+		resetCameraZoomAndSize();
 	}
 
 	public void Update () 
@@ -94,13 +94,19 @@ public class InputController
 			}
 
 			// MAKE THE USER ABLE TO SCROLL-ZOOM
-			if(Input.GetAxis("Mouse ScrollWheel") < 0)
+			if(Input.GetAxis("Mouse ScrollWheel") < 0 || Input.GetKeyDown(KeyCode.Minus))
 			{
 				mMainCam.orthographicSize = Mathf.Min(mMainCam.orthographicSize + 1, 50);
 			}
-			if(Input.GetAxis("Mouse ScrollWheel") > 0)
+			if(Input.GetAxis("Mouse ScrollWheel") > 0 || Input.GetKeyDown(KeyCode.Equals))
 			{
 				mMainCam.orthographicSize = Mathf.Max(mMainCam.orthographicSize - 1, 2);
+			}
+
+			// MAKE THE USER ABLE TO RESET THE CAMERA WITH THE MIDDLE MOUSE BUTTON
+			if(Input.GetMouseButtonDown(2))
+			{
+				resetCameraZoom();
 			}
 
 			// MAKE THE USER ABLE TO EXIT THE GAME WITH ESC-BUTTON
@@ -127,9 +133,14 @@ public class InputController
 		mPrevPoint = mMainCam.ScreenToWorldPoint(Input.mousePosition);
 	}
 
-	public void resetCamera()
+	public void resetCameraZoomAndSize()
 	{
 		mMainCam.transform.position = new Vector3((mEditor.mapController.getCurrentMapSize().x-1.0f)/2.0f, (mEditor.mapController.getCurrentMapSize().y-1.0f)/2.0f, -10);
+		mMainCam.orthographicSize = 15;
+	}
+
+	public void resetCameraZoom()
+	{
 		mMainCam.orthographicSize = 15;
 	}
 }
